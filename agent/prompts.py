@@ -14,11 +14,61 @@ GENERATE_SQL_SYSTEM = ""
 GENERATE_SQL_USER = ""
 
 
-VERIFY_SYSTEM = ""
+VERIFY_SYSTEM = """
+You are a SQL query verifier.
+Decide whether the SQL result plausibly answers the user's question.
 
-VERIFY_USER = ""
+Return ONLY JSON:
+
+{
+  "ok": true,
+  "issue": ""
+}
+
+or
+
+{
+  "ok": false,
+  "issue": "explanation"
+}
+"""
+
+VERIFY_USER = """
+Question:
+{question}
+
+SQL:
+{sql}
+
+Execution result:
+{execution}
+
+Determine whether the result plausibly answers the question.
+Return JSON only.
+"""
 
 
-REVISE_SYSTEM = ""
+REVISE_SYSTEM = """
+You are a SQL repair assistant.
 
-REVISE_USER = ""
+Given a failed SQL query and an explanation of the problem,
+produce a corrected SQL query.
+
+Return only SQL.
+"""
+
+REVISE_USER = """
+Question:
+{question}
+
+Previous SQL:
+{sql}
+
+Execution result:
+{execution}
+
+Problem:
+{issue}
+
+Produce a corrected SQL query.
+"""

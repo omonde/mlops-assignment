@@ -28,6 +28,8 @@ from agent import prompts
 from agent.execution import ExecutionResult, execute_sql
 from agent.schema import render_schema
 
+import json
+
 # Total generate + revise calls before the loop is forced to stop.
 # 3-5 is a reasonable range; tune it as part of Phase 3.
 MAX_ITERATIONS = 3
@@ -112,41 +114,77 @@ def execute_node(state: AgentState) -> dict:
 
 
 def verify_node(state: AgentState) -> dict:
-    """Decide whether state.execution plausibly answers state.question.
+    """Decide whether state.execution plausibly answers state.question."""
+    execution_text = state.execution.render() if state.execution else "No execution result."
 
-    Follow the generate_sql_node pattern: build messages from the VERIFY_*
-    prompts, call llm(), parse the reply. Ask the model for a small JSON object
-    like {"ok": bool, "issue": str} and parse it defensively - the model may
-    wrap it in prose or fences. state.execution.render() gives you a compact
-    view of the rows or error to feed into the prompt.
+    response = llm().invoke([
+        ("system", prompts.VERIFY_SYSTEM),
+        ("user", prompts.VERIFY_USER.format(
+            question=state.question,
+            sql=state.sql,
+            execution=execution_text,
+        )),
+    ])
 
-    Return: {"verify_ok": <bool>, "verify_issue": <str>}.
-    What counts as "not plausible" is yours to define - see the Phase 3 targets
-    in the README.
-    """
-    raise NotImplementedError("Implement in Phase 3")
+    text = response.content.strip()
+
+    try:
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        data = json.loads(match.group(0) if match else text)
+        ok = bool(data.get("ok", False))
+        issue = str(data.get("issue", ""))
+    except Exception:
+        ok = False
+        issue = f"Verifier returned non-JSON response: {text[:500]}"
+
+    return {
+        "verify_ok": ok,
+        "verify_issue": issue,
+        "history": state.history + [{
+            "node": "verify",
+            "ok": ok,
+            "issue": issue,
+        }],
+    }
 
 
 def revise_node(state: AgentState) -> dict:
-    """Produce a revised SQL query given state.verify_issue and the prior attempt.
+    """Produce a revised SQL query given state.verify_issue and the prior attempt."""
+    execution_text = state.execution.render() if state.execution else "No execution result."
 
-    Same shape as generate_sql_node, but the prompt should include the failing
-    SQL, its execution result, and the verifier's complaint so the model can fix
-    it. Bump the iteration counter the same way generate_sql_node does so the
-    loop terminates.
+    response = llm().invoke([
+        ("system", prompts.REVISE_SYSTEM),
+        ("user", prompts.REVISE_USER.format(
+            question=state.question,
+            schema=state.schema,
+            sql=state.sql,
+            execution=execution_text,
+            issue=state.verify_issue,
+        )),
+    ])
 
-    Return: {"sql": <str>, "iteration": state.iteration + 1, ...}.
-    """
-    raise NotImplementedError("Implement in Phase 3")
+    sql = _extract_sql(response.content)
+
+    return {
+        "sql": sql,
+        "iteration": state.iteration + 1,
+        "history": state.history + [{
+            "node": "revise",
+            "sql": sql,
+            "issue": state.verify_issue,
+        }],
+    }
 
 
 def route_after_verify(state: AgentState) -> str:
-    """Conditional router: return "revise" to loop, "end" to terminate.
+    """Conditional router: return 'revise' to loop, 'end' to terminate."""
+    if state.verify_ok:
+        return "end"
 
-    Two reasons to end: the verifier was happy (state.verify_ok), or you've hit
-    the iteration cap (state.iteration >= MAX_ITERATIONS). Otherwise, revise.
-    """
-    raise NotImplementedError("Implement in Phase 3")
+    if state.iteration >= MAX_ITERATIONS:
+        return "end"
+
+    return "revise"
 
 
 # ---- Graph wiring -----------------------------------------------------
