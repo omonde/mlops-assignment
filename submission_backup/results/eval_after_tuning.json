@@ -1,0 +1,1458 @@
+{
+  "summary": {
+    "n": 30,
+    "correct": 8,
+    "accuracy": 0.26666666666666666,
+    "per_iteration_pass_rate": {
+      "1": 0.3,
+      "2": 0.26666666666666666,
+      "3": 0.26666666666666666
+    },
+    "avg_latency_seconds": 1.3778594367665695,
+    "p95_latency_seconds": 3.7957282649986155,
+    "avg_iterations": 1.6666666666666667
+  },
+  "wall_clock_seconds": 42.58855109000069,
+  "results": [
+    {
+      "question": "What is the coordinates location of the circuits for Australian grand prix?",
+      "db_id": "formula_1",
+      "gold_sql": "SELECT DISTINCT T1.lat, T1.lng FROM circuits AS T1 INNER JOIN races AS T2 ON T2.circuitID = T1.circuitId WHERE T2.name = 'Australian Grand Prix'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT lat, lng\nFROM circuits\nWHERE country = 'Australia' AND name LIKE '%Grand Prix%';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 2.005759454999861,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT lat, lng\nFROM circuits\nWHERE name = 'Australian Grand Prix';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT lat, lng\nFROM circuits\nWHERE name = 'Melbourne Grand Prix Circuit';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT lat, lng\nFROM circuits\nWHERE country = 'Australia' AND name LIKE '%Grand Prix%';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT lat, lng\nFROM circuits\nWHERE name = 'Australian Grand Prix';"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The circuit name in the database likely does not match 'Australian Grand Prix' exactly; it should be the circuit's name (e.g., 'Melbourne Grand Prix Circuit') rather than the race name. The query should use the correct circuit name or a more flexible match."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT lat, lng\nFROM circuits\nWHERE name = 'Melbourne Grand Prix Circuit';",
+          "issue": "The circuit name in the database likely does not match 'Australian Grand Prix' exactly; it should be the circuit's name (e.g., 'Melbourne Grand Prix Circuit') rather than the race name. The query should use the correct circuit name or a more flexible match."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns 0 rows, but the Melbourne Grand Prix Circuit should exist in the circuits table. The SQL is syntactically valid and uses the correct table and columns, but the result is inconsistent with the expected data, suggesting either a data issue or incorrect circuit name."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT lat, lng\nFROM circuits\nWHERE country = 'Australia' AND name LIKE '%Grand Prix%';",
+          "issue": "The query returns 0 rows, but the Melbourne Grand Prix Circuit should exist in the circuits table. The SQL is syntactically valid and uses the correct table and columns, but the result is inconsistent with the expected data, suggesting either a data issue or incorrect circuit name."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, but the Australian Grand Prix does have a circuit (Melbourne Grand Prix Circuit). The issue may be that the circuit name does not match the 'LIKE %Grand Prix%' pattern, suggesting the name might be stored differently (e.g., 'Melbourne' or 'Albert Park'). The query should be adjusted to account for possible name variations."
+        }
+      ]
+    },
+    {
+      "question": "List down Ajax's superpowers.",
+      "db_id": "superhero",
+      "gold_sql": "SELECT T3.power_name FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T1.superhero_name = 'Ajax'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT sp.power_name\nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower sp ON hp.power_id = sp.id\nWHERE s.superhero_name = 'Ajax';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.4321822769998107,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT sp.power_name\nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower sp ON hp.power_id = sp.id\nWHERE s.superhero_name = 'Ajax';",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT sp.power_name\nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower sp ON hp.power_id = sp.id\nWHERE s.superhero_name = 'Ajax';"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "List the top five schools, by descending order, from the highest to the lowest, the most number of Enrollment (Ages 5-17). Please give their NCES school identification number.",
+      "db_id": "california_schools",
+      "gold_sql": "SELECT T1.NCESSchool FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode ORDER BY T2.`Enrollment (Ages 5-17)` DESC LIMIT 5",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT s.NCESSchool\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nORDER BY f.\"Enrollment (Ages 5-17)\" DESC\nLIMIT 5;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.509757644000274,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT s.NCESSchool\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nORDER BY f.\"Enrollment (Ages 5-17)\" DESC\nLIMIT 5;",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT s.NCESSchool\nFROM schools s\nJOIN frpm f ON s.CDSCode = f.CDSCode\nORDER BY f.\"Enrollment (Ages 5-17)\" DESC\nLIMIT 5;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "What is the average number of crimes committed in 1995 in regions where the number exceeds 4000 and the region has accounts that are opened starting from the year 1997?",
+      "db_id": "financial",
+      "gold_sql": "SELECT AVG(T1.A15) FROM district AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id WHERE STRFTIME('%Y', T2.date) >= '1997' AND T1.A15 > 4000",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND CAST(strftime('%Y', a.date) AS INTEGER) >= 1997\n  );",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 3.7957282649986155,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND strftime('%Y', a.date) >= '1997'\n  );",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND CAST(strftime('%Y', a.date) AS INTEGER) >= 1997\n  );",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND CAST(strftime('%Y', a.date) AS INTEGER) >= 1997\n  );",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND strftime('%Y', a.date) >= '1997'\n  );"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The execution result shows 'None' for the average_crimes, which is inconsistent with the question asking for a numerical average. The query should return a numeric value, but the result is empty, indicating a potential issue with data or logic. Additionally, the use of 'strftime' suggests SQLite, but the column 'A14' and 'district_id' may not be correctly mapped to the intended data model. The query logic may be correct, but the result being None implies no rows matched, which contradicts the expectation of finding regions with crimes > 4000 and accounts opened from 1997."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND CAST(strftime('%Y', a.date) AS INTEGER) >= 1997\n  );",
+          "issue": "The execution result shows 'None' for the average_crimes, which is inconsistent with the question asking for a numerical average. The query should return a numeric value, but the result is empty, indicating a potential issue with data or logic. Additionally, the use of 'strftime' suggests SQLite, but the column 'A14' and 'district_id' may not be correctly mapped to the intended data model. The query logic may be correct, but the result being None implies no rows matched, which contradicts the expectation of finding regions with crimes > 4000 and accounts opened from 1997."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The execution result shows 'None' for the average_crimes, which is inconsistent with the question asking for a numerical average. The query should return a numeric value, but the result is empty, indicating a potential issue with data or logic."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT AVG(d.A14) AS average_crimes\nFROM district d\nWHERE d.A14 > 4000\n  AND EXISTS (\n    SELECT 1\n    FROM account a\n    WHERE a.district_id = d.district_id\n      AND CAST(strftime('%Y', a.date) AS INTEGER) >= 1997\n  );",
+          "issue": "The execution result shows 'None' for the average_crimes, which is inconsistent with the question asking for a numerical average. The query should return a numeric value, but the result is empty, indicating a potential issue with data or logic."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The execution result shows 'None' for the average_crimes, which is inconsistent with the question asking for a numerical average. The query should return a numeric value, but the result is empty, indicating a potential issue with data or logic."
+        }
+      ]
+    },
+    {
+      "question": "How many male clients in 'Hl.m. Praha' district?",
+      "db_id": "financial",
+      "gold_sql": "SELECT COUNT(T1.client_id) FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'M' AND T2.A2 = 'Hl.m. Praha'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM client c\nJOIN district d ON c.district_id = d.district_id\nWHERE c.gender = 'M' AND d.A2 = 'Hl.m. Praha';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.42232752999916556,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM client c\nJOIN district d ON c.district_id = d.district_id\nWHERE c.gender = 'M' AND d.A2 = 'Hl.m. Praha';",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM client c\nJOIN district d ON c.district_id = d.district_id\nWHERE c.gender = 'M' AND d.A2 = 'Hl.m. Praha';"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "What is the average fastest lap time in seconds for Lewis Hamilton in all the Formula_1 races?",
+      "db_id": "formula_1",
+      "gold_sql": "SELECT AVG(CAST(SUBSTR(T2.fastestLapTime, 1, INSTR(T2.fastestLapTime, ':') - 1) AS INTEGER) * 60 + CAST(SUBSTR(T2.fastestLapTime, INSTR(T2.fastestLapTime, ':') + 1) AS REAL)) FROM drivers AS T1 INNER JOIN results AS T2 ON T1.driverId = T2.driverId WHERE T1.surname = 'Hamilton' AND T1.forename = 'Lewis'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL\n  AND r.fastestLapTime != '';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 3.9367534009998053,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL\n  AND r.fastestLapTime != '';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL\n  AND r.fastestLapTime != '';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL;"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The average fastest lap time of approximately 1.315 seconds is implausibly low. Fastest lap times in Formula 1 are typically around 1 minute (60 seconds), so a value of 1.3 seconds is impossible. The issue likely stems from incorrect handling of the time format, possibly due to improper parsing of the time string (e.g., treating '1:31.522' as '1.31522' instead of '91.522' seconds)."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL\n  AND r.fastestLapTime != '';",
+          "issue": "The average fastest lap time of approximately 1.315 seconds is implausibly low. Fastest lap times in Formula 1 are typically around 1 minute (60 seconds), so a value of 1.3 seconds is impossible. The issue likely stems from incorrect handling of the time format, possibly due to improper parsing of the time string (e.g., treating '1:31.522' as '1.31522' instead of '91.522' seconds)."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The average fastest lap time of approximately 1.315 seconds is implausible, as fastest lap times in Formula 1 are typically around 1 minute (60 seconds), not under 2 seconds. This suggests a flaw in the data processing, likely due to incorrect handling of the time format (e.g., treating '1:31.522' as '1.31522' instead of converting minutes and seconds properly)."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT AVG(CAST(REPLACE(REPLACE(r.fastestLapTime, ' ', ''), ':', '.') AS REAL)) AS average_fastest_lap_time_seconds\nFROM results r\nJOIN drivers d ON r.driverId = d.driverId\nWHERE d.forename = 'Lewis' AND d.surname = 'Hamilton'\n  AND r.fastestLapTime IS NOT NULL\n  AND r.fastestLapTime != '';",
+          "issue": "The average fastest lap time of approximately 1.315 seconds is implausible, as fastest lap times in Formula 1 are typically around 1 minute (60 seconds), not under 2 seconds. This suggests a flaw in the data processing, likely due to incorrect handling of the time format (e.g., treating '1:31.522' as '1.31522' instead of converting minutes and seconds properly)."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The average fastest lap time of approximately 1.315 seconds is implausible, as fastest lap times in Formula 1 are typically around 1 minute (60 seconds), not under 2 seconds. This suggests a flaw in the data processing, likely due to incorrect handling of the time format (e.g., treating '1:31.522' as '1.31522' instead of converting minutes and seconds properly)."
+        }
+      ]
+    },
+    {
+      "question": "From race no. 50 to 100, how many finishers have been disqualified?",
+      "db_id": "formula_1",
+      "gold_sql": "SELECT SUM(IIF(time IS NOT NULL, 1, 0)) FROM results WHERE statusId = 2 AND raceID < 100 AND raceId > 50",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM results \nWHERE raceId BETWEEN 50 AND 100 \n  AND statusId = (SELECT statusId FROM status WHERE status = 'Disqualified')",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.3995950449989323,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM results \nWHERE raceId BETWEEN 50 AND 100 \n  AND statusId = (SELECT statusId FROM status WHERE status = 'Disqualified')",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM results \nWHERE raceId BETWEEN 50 AND 100 \n  AND statusId = (SELECT statusId FROM status WHERE status = 'Disqualified')"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Calculate the difference of the total amount spent in all events by the Student_Club in year 2019 and 2020.",
+      "db_id": "student_club",
+      "gold_sql": "SELECT SUM(CASE WHEN SUBSTR(T1.event_date, 1, 4) = '2019' THEN T2.spent ELSE 0 END) - SUM(CASE WHEN SUBSTR(T1.event_date, 1, 4) = '2020' THEN T2.spent ELSE 0 END) AS num FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT \n  (SELECT SUM(b.spent) FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE strftime('%Y', e.event_date) = '2020') -\n  (SELECT SUM(b.spent) FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE strftime('%Y', e.event_date) = '2019') AS difference;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.7376286510007048,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT \n  (SELECT SUM(b.spent) FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE strftime('%Y', e.event_date) = '2020') -\n  (SELECT SUM(b.spent) FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE strftime('%Y', e.event_date) = '2019') AS difference;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT \n  (SELECT SUM(b.spent) FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE strftime('%Y', e.event_date) = '2020') -\n  (SELECT SUM(b.spent) FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE strftime('%Y', e.event_date) = '2019') AS difference;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "What is the complete address of the school with the lowest excellence rate? Indicate the Street, City, Zip and State.",
+      "db_id": "california_schools",
+      "gold_sql": "SELECT T2.Street, T2.City, T2.State, T2.Zip FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY CAST(T1.NumGE1500 AS REAL) / T1.NumTstTakr ASC LIMIT 1",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT s.Street, s.City, s.Zip, s.State\nFROM schools s\nJOIN satscores ss ON s.CDSCode = ss.cds\nORDER BY (ss.NumGE1500 * 1.0 / ss.NumTstTakr) ASC\nLIMIT 1;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.5600149000001693,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT s.Street, s.City, s.Zip, s.State\nFROM schools s\nJOIN satscores ss ON s.CDSCode = ss.cds\nORDER BY (ss.NumGE1500 * 1.0 / ss.NumTstTakr) ASC\nLIMIT 1;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT s.Street, s.City, s.Zip, s.State\nFROM schools s\nJOIN satscores ss ON s.CDSCode = ss.cds\nORDER BY (ss.NumGE1500 * 1.0 / ss.NumTstTakr) ASC\nLIMIT 1;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Calculate the percentage of carcinogenic molecules which contain the Chlorine element.",
+      "db_id": "toxicology",
+      "gold_sql": "SELECT COUNT(CASE WHEN T2.label = '+' AND T1.element = 'cl' THEN T2.molecule_id ELSE NULL END) * 100 / COUNT(T2.molecule_id) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT \n  (COUNT(CASE WHEN a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(*)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic'\n  AND a.element = 'Cl';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 3.1419196930000908,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT \n  (COUNT(CASE WHEN m.label = 'carcinogenic' AND a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(CASE WHEN m.label = 'carcinogenic' THEN 1 END)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT \n  (COUNT(CASE WHEN a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(*)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT \n  (COUNT(CASE WHEN a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(*)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic'\n  AND a.element = 'Cl';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT \n  (COUNT(CASE WHEN m.label = 'carcinogenic' AND a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(CASE WHEN m.label = 'carcinogenic' THEN 1 END)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic';"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns no rows, but the question expects a percentage value. The result 'None' indicates no data was returned, which suggests the query may not be executing correctly or the data is missing. Additionally, the query uses a JOIN between molecule and atom tables, but it's unclear if the 'element' column in the 'atom' table contains 'Cl' as a value or if it's stored differently (e.g., 'Cl' vs 'chlorine'). The absence of results makes the query non-functional for the intended purpose."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT \n  (COUNT(CASE WHEN a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(*)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic';",
+          "issue": "The query returns no rows, but the question expects a percentage value. The result 'None' indicates no data was returned, which suggests the query may not be executing correctly or the data is missing. Additionally, the query uses a JOIN between molecule and atom tables, but it's unclear if the 'element' column in the 'atom' table contains 'Cl' as a value or if it's stored differently (e.g., 'Cl' vs 'chlorine'). The absence of results makes the query non-functional for the intended purpose."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The execution result shows 'None' for the percentage value, which is inconsistent with the question. The query should return a numeric percentage, but the result is missing the actual value. This suggests a problem with the execution or data retrieval, making the result non-plausible."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT \n  (COUNT(CASE WHEN a.element = 'Cl' THEN 1 END) * 100.0 / COUNT(*)) AS percentage\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE m.label = 'carcinogenic'\n  AND a.element = 'Cl';",
+          "issue": "The execution result shows 'None' for the percentage value, which is inconsistent with the question. The query should return a numeric percentage, but the result is missing the actual value. This suggests a problem with the execution or data retrieval, making the result non-plausible."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns no rows, but the question expects a percentage value. The result 'None' indicates no data was returned, which suggests the query may not be correctly retrieving data, possibly due to incorrect table joins or filtering conditions."
+        }
+      ]
+    },
+    {
+      "question": "How many users received commentator badges in 2014?",
+      "db_id": "codebase_community",
+      "gold_sql": "SELECT COUNT(Id) FROM badges WHERE Name = 'Commentator' AND STRFTIME('%Y', Date) = '2014'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM badges \nWHERE Name = 'commentator' \n  AND strftime('%Y', Date) = '2014';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.41704701999879035,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM badges \nWHERE Name = 'commentator' \n  AND strftime('%Y', Date) = '2014';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM badges \nWHERE Name = 'commentator' \n  AND strftime('%Y', Date) = '2014';"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Among the patients with a normal Ig G level, how many of them have symptoms?",
+      "db_id": "thrombosis_prediction",
+      "gold_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE T2.IGG BETWEEN 900 AND 2000 AND T3.Symptoms IS NOT NULL",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM Examination \nWHERE \"aCL IgG\" <= 20 AND \"Symptoms\" IS NOT NULL AND \"Symptoms\" != ''",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.41937728300035815,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM Examination \nWHERE \"aCL IgG\" <= 20 AND \"Symptoms\" IS NOT NULL AND \"Symptoms\" != ''",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM Examination \nWHERE \"aCL IgG\" <= 20 AND \"Symptoms\" IS NOT NULL AND \"Symptoms\" != ''"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "How many superheroes have the super power of \"Super Strength\"?",
+      "db_id": "superhero",
+      "gold_sql": "SELECT COUNT(T1.hero_id) FROM hero_power AS T1 INNER JOIN superpower AS T2 ON T1.power_id = T2.id WHERE T2.power_name = 'Super Strength'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower p ON hp.power_id = p.id\nWHERE p.power_name = 'Super Strength';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.40866007699878537,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower p ON hp.power_id = p.id\nWHERE p.power_name = 'Super Strength';",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM superhero s\nJOIN hero_power hp ON s.id = hp.hero_id\nJOIN superpower p ON hp.power_id = p.id\nWHERE p.power_name = 'Super Strength';"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Please list the name of the cards in the set Coldsnap with the highest converted mana cost.",
+      "db_id": "card_games",
+      "gold_sql": "SELECT T1.name FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T2.name = 'Coldsnap' ORDER BY T1.convertedManaCost DESC LIMIT 1",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT c.name\nFROM cards c\nJOIN sets s ON c.setCode = s.code\nWHERE s.name = 'Coldsnap'\n  AND c.convertedManaCost = (\n    SELECT MAX(c2.convertedManaCost)\n    FROM cards c2\n    JOIN sets s2 ON c2.setCode = s2.code\n    WHERE s2.name = 'Coldsnap'\n  );",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 2,
+      "latency_seconds": 1.6488053600005514,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT c.name\nFROM cards c\nJOIN sets s ON c.setCode = s.code\nWHERE s.name = 'Coldsnap'\nORDER BY c.convertedManaCost DESC\nLIMIT 1;",
+          "ok": true,
+          "error": null,
+          "correct": true
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT c.name\nFROM cards c\nJOIN sets s ON c.setCode = s.code\nWHERE s.name = 'Coldsnap'\n  AND c.convertedManaCost = (\n    SELECT MAX(c2.convertedManaCost)\n    FROM cards c2\n    JOIN sets s2 ON c2.setCode = s2.code\n    WHERE s2.name = 'Coldsnap'\n  );",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT c.name\nFROM cards c\nJOIN sets s ON c.setCode = s.code\nWHERE s.name = 'Coldsnap'\nORDER BY c.convertedManaCost DESC\nLIMIT 1;"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns only one card (Sunscour) with the highest converted mana cost, but the question asks for 'the name of the cards' (plural), implying there could be multiple cards sharing the highest CMC. The query uses LIMIT 1, which prevents returning all cards with the maximum CMC, making it incomplete."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT c.name\nFROM cards c\nJOIN sets s ON c.setCode = s.code\nWHERE s.name = 'Coldsnap'\n  AND c.convertedManaCost = (\n    SELECT MAX(c2.convertedManaCost)\n    FROM cards c2\n    JOIN sets s2 ON c2.setCode = s2.code\n    WHERE s2.name = 'Coldsnap'\n  );",
+          "issue": "The query returns only one card (Sunscour) with the highest converted mana cost, but the question asks for 'the name of the cards' (plural), implying there could be multiple cards sharing the highest CMC. The query uses LIMIT 1, which prevents returning all cards with the maximum CMC, making it incomplete."
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "For all patients with normal uric acid (UA), what is the average UA index based on their latest laboratory examination result?",
+      "db_id": "thrombosis_prediction",
+      "gold_sql": "SELECT AVG(T2.UA) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE (T2.UA < 6.5 AND T1.SEX = 'F') OR (T2.UA < 8.0 AND T1.SEX = 'M') AND T2.Date = ( SELECT MAX(Date) FROM Laboratory )",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT AVG(l.\"UA\") AS average_UA\nFROM \"Laboratory\" l\nJOIN \"Patient\" p ON l.\"ID\" = p.\"ID\"\nWHERE l.\"UA\" BETWEEN 3.0 AND 7.0\n  AND l.\"Date\" = (\n    SELECT MAX(l2.\"Date\")\n    FROM \"Laboratory\" l2\n    WHERE l2.\"ID\" = l.\"ID\"\n  )\nLIMIT 100;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.7421323409998877,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT AVG(l.\"UA\") AS average_UA\nFROM \"Laboratory\" l\nJOIN \"Patient\" p ON l.\"ID\" = p.\"ID\"\nWHERE l.\"UA\" BETWEEN 3.0 AND 7.0\n  AND l.\"Date\" = (\n    SELECT MAX(l2.\"Date\")\n    FROM \"Laboratory\" l2\n    WHERE l2.\"ID\" = l.\"ID\"\n  )\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT AVG(l.\"UA\") AS average_UA\nFROM \"Laboratory\" l\nJOIN \"Patient\" p ON l.\"ID\" = p.\"ID\"\nWHERE l.\"UA\" BETWEEN 3.0 AND 7.0\n  AND l.\"Date\" = (\n    SELECT MAX(l2.\"Date\")\n    FROM \"Laboratory\" l2\n    WHERE l2.\"ID\" = l.\"ID\"\n  )\nLIMIT 100;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "User No.23853 gave a comment to a post at 9:08:18 on 2013/7/12, was that post well-finished?",
+      "db_id": "codebase_community",
+      "gold_sql": "SELECT IIF(T2.ClosedDate IS NULL, 'NOT well-finished', 'well-finished') AS resylt FROM comments AS T1 INNER JOIN posts AS T2 ON T1.PostId = T2.Id WHERE T1.UserId = 23853 AND T1.CreationDate = '2013-07-12 09:08:18.0'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate = '2013-07-12 09:08:18';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 2.676345785999729,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate = '2013-07-12 09:08:18';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate LIKE '2013-07-12 09:08:18%';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate = '2013-07-12 09:08:18';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate = '2013-07-12 09:08:18';"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns 0 rows, but the question asks whether the post was well-finished, which cannot be determined from the absence of a comment. The SQL does not check post completion status, and the result does not address the question."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate LIKE '2013-07-12 09:08:18%';",
+          "issue": "The query returns 0 rows, but the question asks whether the post was well-finished, which cannot be determined from the absence of a comment. The SQL does not check post completion status, and the result does not address the question."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The question asks whether the post was 'well-finished,' but the SQL query only retrieves the post's title and body. There is no information about the post's completion status, such as whether it was edited, closed, or marked as answered. The result does not address the question's intent."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT p.Title, p.Body\nFROM comments c\nJOIN posts p ON c.PostId = p.Id\nWHERE c.UserId = 23853\n  AND c.CreationDate = '2013-07-12 09:08:18';",
+          "issue": "The question asks whether the post was 'well-finished,' but the SQL query only retrieves the post's title and body. There is no information about the post's completion status, such as whether it was edited, closed, or marked as answered. The result does not address the question's intent."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns 0 rows, but the question asks whether the post was well-finished, which cannot be determined from the absence of a comment. The SQL does not check post completion status, and the result does not address the question."
+        }
+      ]
+    },
+    {
+      "question": "How many members of Business have the Medium size of tee shirt?",
+      "db_id": "student_club",
+      "gold_sql": "SELECT COUNT(T2.member_id) FROM major AS T1 INNER JOIN member AS T2 ON T1.major_id = T2.link_to_major WHERE T1.major_name = 'Business' AND T2.t_shirt_size = 'Medium'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM member m\nJOIN major maj ON m.link_to_major = maj.major_id\nWHERE maj.major_name = 'Business' AND m.t_shirt_size = 'Medium';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.40055556000152137,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM member m\nJOIN major maj ON m.link_to_major = maj.major_id\nWHERE maj.major_name = 'Business' AND m.t_shirt_size = 'Medium';",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM member m\nJOIN major maj ON m.link_to_major = maj.major_id\nWHERE maj.major_name = 'Business' AND m.t_shirt_size = 'Medium';"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "What is the type of the card \"Ancestor's Chosen\" as originally printed?",
+      "db_id": "card_games",
+      "gold_sql": "SELECT originalType FROM cards WHERE name = 'Ancestor''s Chosen' AND originalType IS NOT NULL",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT originalType\nFROM cards\nWHERE name = 'Ancestor''s Chosen'\n  AND originalType IS NOT NULL\nLIMIT 1;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 2,
+      "latency_seconds": 1.2899607109993667,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT originalType\nFROM cards\nWHERE name = 'Ancestor''s Chosen'\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT originalType\nFROM cards\nWHERE name = 'Ancestor''s Chosen'\n  AND originalType IS NOT NULL\nLIMIT 1;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT originalType\nFROM cards\nWHERE name = 'Ancestor''s Chosen'\nLIMIT 100;"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns multiple rows with different values for originalType, but the question asks for the type as originally printed, implying a single definitive answer. The presence of 'None' and inconsistent formatting (e.g., 'Creature - Cleric' vs 'Creature \u2014 Human Cleric') suggests the data may be inconsistent or the query is not filtering properly. Additionally, the use of 'LIMIT 100' is unnecessary and may indicate a lack of precision in the query intent."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT originalType\nFROM cards\nWHERE name = 'Ancestor''s Chosen'\n  AND originalType IS NOT NULL\nLIMIT 1;",
+          "issue": "The query returns multiple rows with different values for originalType, but the question asks for the type as originally printed, implying a single definitive answer. The presence of 'None' and inconsistent formatting (e.g., 'Creature - Cleric' vs 'Creature \u2014 Human Cleric') suggests the data may be inconsistent or the query is not filtering properly. Additionally, the use of 'LIMIT 100' is unnecessary and may indicate a lack of precision in the query intent."
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Which active district has the highest average score in Reading?",
+      "db_id": "california_schools",
+      "gold_sql": "SELECT T1.District FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T1.StatusType = 'Active' ORDER BY T2.AvgScrRead DESC LIMIT 1",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT s.District, AVG(ss.AvgScrRead) AS avg_reading_score\nFROM schools s\nJOIN satscores ss ON s.CDSCode = ss.cds\nWHERE s.StatusType = 'Active'\nGROUP BY s.District\nORDER BY avg_reading_score DESC\nLIMIT 1;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.5408226519994059,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT s.District, AVG(ss.AvgScrRead) AS avg_reading_score\nFROM schools s\nJOIN satscores ss ON s.CDSCode = ss.cds\nWHERE s.StatusType = 'Active'\nGROUP BY s.District\nORDER BY avg_reading_score DESC\nLIMIT 1;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT s.District, AVG(ss.AvgScrRead) AS avg_reading_score\nFROM schools s\nJOIN satscores ss ON s.CDSCode = ss.cds\nWHERE s.StatusType = 'Active'\nGROUP BY s.District\nORDER BY avg_reading_score DESC\nLIMIT 1;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Please provide the IDs of the 3 female clients with the largest loans.",
+      "db_id": "financial",
+      "gold_sql": "SELECT T1.client_id FROM client AS T1 INNER JOIN disp AS T4 on T1.client_id= T4.client_id INNER JOIN account AS T2 ON T4.account_id = T2.account_id  INNER JOIN loan AS T3 ON T2.account_id = T3.account_id and T4.account_id = T3.account_id WHERE T1.gender = 'F' ORDER BY T3.amount DESC LIMIT 3",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT c.client_id\nFROM client c\nJOIN disp d ON c.client_id = d.client_id\nJOIN loan l ON d.account_id = l.account_id\nWHERE c.gender = 'F'\nORDER BY l.amount DESC\nLIMIT 3;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.4694309019996581,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT c.client_id\nFROM client c\nJOIN disp d ON c.client_id = d.client_id\nJOIN loan l ON d.account_id = l.account_id\nWHERE c.gender = 'F'\nORDER BY l.amount DESC\nLIMIT 3;",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT c.client_id\nFROM client c\nJOIN disp d ON c.client_id = d.client_id\nJOIN loan l ON d.account_id = l.account_id\nWHERE c.gender = 'F'\nORDER BY l.amount DESC\nLIMIT 3;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Among all the lap records set on various circuits, what is the time for the fastest one?",
+      "db_id": "formula_1",
+      "gold_sql": "SELECT time FROM lapTimes ORDER BY (CASE WHEN INSTR(time, ':') <> INSTR(SUBSTR(time, INSTR(time, ':') + 1), ':') + INSTR(time, ':') THEN CAST(SUBSTR(time, 1, INSTR(time, ':') - 1) AS REAL) * 3600 ELSE 0 END) + (CAST(SUBSTR(time, INSTR(time, ':') - 2 * (INSTR(time, ':') = INSTR(SUBSTR(time, INSTR(time, ':') + 1), ':') + INSTR(time, ':')), INSTR(time, ':') - 1) AS REAL) * 60) + (CAST(SUBSTR(time, INSTR(time, ':') + 1, INSTR(time, '.') - INSTR(time, ':') - 1) AS REAL)) + (CAST(SUBSTR(time, INSTR(time, '.') + 1) AS REAL) / 1000) ASC LIMIT 1",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT MIN(milliseconds) AS fastest_lap_time\nFROM lapTimes;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.27826189500046894,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT MIN(milliseconds) AS fastest_lap_time\nFROM lapTimes;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT MIN(milliseconds) AS fastest_lap_time\nFROM lapTimes;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "In superheroes with missing weight data, calculate the difference between the number of superheroes with blue eyes and no eye color.",
+      "db_id": "superhero",
+      "gold_sql": "SELECT SUM(CASE WHEN T2.id = 7 THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.id = 1 THEN 1 ELSE 0 END) FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id WHERE T1.weight_kg = 0 OR T1.weight_kg is NULL",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT \n  (SELECT COUNT(*) FROM superhero WHERE eye_colour_id = (SELECT id FROM colour WHERE colour = 'Blue') AND weight_kg IS NULL) -\n  (SELECT COUNT(*) FROM superhero WHERE eye_colour_id IS NULL AND weight_kg IS NULL) AS difference;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.5018609859998833,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT \n  (SELECT COUNT(*) FROM superhero WHERE eye_colour_id = (SELECT id FROM colour WHERE colour = 'Blue') AND weight_kg IS NULL) -\n  (SELECT COUNT(*) FROM superhero WHERE eye_colour_id IS NULL AND weight_kg IS NULL) AS difference;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT \n  (SELECT COUNT(*) FROM superhero WHERE eye_colour_id = (SELECT id FROM colour WHERE colour = 'Blue') AND weight_kg IS NULL) -\n  (SELECT COUNT(*) FROM superhero WHERE eye_colour_id IS NULL AND weight_kg IS NULL) AS difference;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "In the College of Agriculture and Applied Sciences, how many majors are under the department of School of Applied Sciences, Technology and Education?",
+      "db_id": "student_club",
+      "gold_sql": "SELECT COUNT(major_id) FROM major WHERE department = 'School of Applied Sciences, Technology and Education' AND college = 'College of Agriculture and Applied Sciences'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT COUNT(*) \nFROM major \nWHERE college = 'College of Agriculture and Applied Sciences' \n  AND department = 'School of Applied Sciences, Technology and Education';",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.36259312099900853,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM major \nWHERE college = 'College of Agriculture and Applied Sciences' \n  AND department = 'School of Applied Sciences, Technology and Education';",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT COUNT(*) \nFROM major \nWHERE college = 'College of Agriculture and Applied Sciences' \n  AND department = 'School of Applied Sciences, Technology and Education';"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Mention the display name and location of the user who owned the excerpt post with hypothesis-testing tag.",
+      "db_id": "codebase_community",
+      "gold_sql": "SELECT T3.DisplayName, T3.Location FROM tags AS T1 INNER JOIN posts AS T2 ON T1.ExcerptPostId = T2.Id INNER JOIN users AS T3 ON T3.Id = T2.OwnerUserId WHERE T1.TagName = 'hypothesis-testing'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT u.DisplayName, u.Location\nFROM users u\nJOIN posts p ON u.Id = p.OwnerUserId\nJOIN tags t ON p.Id = t.ExcerptPostId\nWHERE t.TagName = 'hypothesis-testing'\nLIMIT 100;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.47855452000112564,
+      "correct": true,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT u.DisplayName, u.Location\nFROM users u\nJOIN posts p ON u.Id = p.OwnerUserId\nJOIN tags t ON p.Id = t.ExcerptPostId\nWHERE t.TagName = 'hypothesis-testing'\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": true
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT u.DisplayName, u.Location\nFROM users u\nJOIN posts p ON u.Id = p.OwnerUserId\nJOIN tags t ON p.Id = t.ExcerptPostId\nWHERE t.TagName = 'hypothesis-testing'\nLIMIT 100;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "List all patients who were followed up at the outpatient clinic who underwent a laboratory test in October 1991 and had a total blood bilirubin level within the normal range.",
+      "db_id": "thrombosis_prediction",
+      "gold_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Admission = '-' AND T2.`T-BIL` < 2.0 AND T2.Date LIKE '1991-10-%'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date >= '1991-10-01'\n  AND l.Date < '1991-11-01'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 4.706247350999547,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date BETWEEN '1991-10-01' AND '1991-10-31'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date >= '1991-10-01'\n  AND l.Date < '1991-11-01'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date >= '1991-10-01'\n  AND l.Date < '1991-11-01'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date BETWEEN '1991-10-01' AND '1991-10-31'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The execution result returns 0 rows, but this may not be accurate if there are patients meeting the criteria. The query assumes that 'T-BIL' is the correct column for total blood bilirubin and that the date range is correctly interpreted. However, the absence of results could indicate a data issue or incorrect column/table usage. Additionally, the use of 'Admission = 'outpatient clinic'' may not correctly capture outpatient follow-ups if the data uses a different format or code for admission type. The query may be syntactically valid, but the result is suspiciously empty, suggesting potential misalignment with the actual data or intent."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date >= '1991-10-01'\n  AND l.Date < '1991-11-01'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;",
+          "issue": "The execution result returns 0 rows, but this may not be accurate if there are patients meeting the criteria. The query assumes that 'T-BIL' is the correct column for total blood bilirubin and that the date range is correctly interpreted. However, the absence of results could indicate a data issue or incorrect column/table usage. Additionally, the use of 'Admission = 'outpatient clinic'' may not correctly capture outpatient follow-ups if the data uses a different format or code for admission type. The query may be syntactically valid, but the result is suspiciously empty, suggesting potential misalignment with the actual data or intent."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns 0 rows, but this may not be accurate if such patients exist. The issue is that the execution result being 0 rows is not necessarily incorrect, but the query assumes that 'T-BIL' is the correct column for total blood bilirubin and that the 'Laboratory' table contains the required data. However, the absence of results without evidence of data issues suggests the query might not be correctly capturing the intended data, possibly due to incorrect column name, table structure, or data availability. The query logic is sound, but the result being 0 rows raises concern about whether the data actually exists or if the query is misaligned with the data model."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT DISTINCT p.*\nFROM Patient p\nJOIN Laboratory l ON p.ID = l.ID\nWHERE p.Admission = 'outpatient clinic'\n  AND l.Date >= '1991-10-01'\n  AND l.Date < '1991-11-01'\n  AND l.\"T-BIL\" BETWEEN 0.2 AND 1.2;",
+          "issue": "The query returns 0 rows, but this may not be accurate if such patients exist. The issue is that the execution result being 0 rows is not necessarily incorrect, but the query assumes that 'T-BIL' is the correct column for total blood bilirubin and that the 'Laboratory' table contains the required data. However, the absence of results without evidence of data issues suggests the query might not be correctly capturing the intended data, possibly due to incorrect column name, table structure, or data availability. The query logic is sound, but the result being 0 rows raises concern about whether the data actually exists or if the query is misaligned with the data model."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returns 0 rows, but this may not be accurate if there were patients meeting the criteria. The issue could be that the 'Admission' field might not correctly reflect 'outpatient clinic' (e.g., missing or mislabeled values), or the 'T-BIL' range (0.2\u20131.2) might be too restrictive or incorrect for normal bilirubin levels. Additionally, the query assumes the 'Laboratory' table has a 'Date' field and 'T-BIL' column, which may not be valid. The execution result being 0 rows is plausible only if no such patients exist, but without data validation, the query's correctness cannot be confirmed. The most likely issue is that the 'Admission' field may not be properly populated or matched."
+        }
+      ]
+    },
+    {
+      "question": "Among the molecules with element Calcium, are they mostly carcinogenic or non carcinogenic?",
+      "db_id": "toxicology",
+      "gold_sql": "SELECT T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.element = 'ca' GROUP BY T2.label ORDER BY COUNT(T2.label) DESC LIMIT 1",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 3.5244388500013883,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC\nLIMIT 1;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC\nLIMIT 1;"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, which means no molecules containing Calcium were found in the database. This is implausible given that Calcium is a common element in molecules, so the issue likely lies in incorrect table/column usage or data absence. The query may be using wrong tables or columns, or the data might not be properly linked."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC;",
+          "issue": "The query returned 0 rows, which means no molecules containing Calcium were found in the database. This is implausible given that Calcium is a common element in molecules, so the issue likely lies in incorrect table/column usage or data absence. The query may be using wrong tables or columns, or the data might not be properly linked."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, which suggests no molecules containing Calcium were found. However, Calcium is a common element in molecules, so the absence of results indicates a potential issue with the data or the query logic. The SQL is syntactically valid and appears to match the intent, but the result is implausible given real-world knowledge, suggesting a problem with data availability or table structure."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT \n  CASE \n    WHEN m.label = 'carcinogenic' THEN 'carcinogenic'\n    ELSE 'non carcinogenic'\n  END AS carcinogenic_status,\n  COUNT(*) AS count\nFROM molecule m\nJOIN atom a ON m.molecule_id = a.molecule_id\nWHERE a.element = 'Calcium'\nGROUP BY carcinogenic_status\nORDER BY count DESC;",
+          "issue": "The query returned 0 rows, which suggests no molecules containing Calcium were found. However, Calcium is a common element in molecules, so the absence of results indicates a potential issue with the data or the query logic. The SQL is syntactically valid and appears to match the intent, but the result is implausible given real-world knowledge, suggesting a problem with data availability or table structure."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, which suggests no molecules containing Calcium were found. However, Calcium is a common element in molecules, so the absence of results indicates a potential issue with the data or the query logic. The SQL is syntactically valid and appears to match the intent, but the result is implausible given real-world knowledge\u2014Calcium-containing molecules do exist. This suggests a problem with the data or the schema (e.g., incorrect column names, missing data, or wrong table joins)."
+        }
+      ]
+    },
+    {
+      "question": "Please list the full names of the students in the Student_Club that come from the Art and Design Department.",
+      "db_id": "student_club",
+      "gold_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T2.department = 'Art and Design Department'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT s.first_name, s.last_name\nFROM student s\nJOIN student_club sc ON s.student_id = sc.student_id\nJOIN major m ON s.major_id = m.major_id\nWHERE m.department = 'Art and Design';",
+      "agent_ok": false,
+      "agent_error": "OperationalError: no such table: student",
+      "pred_ok": false,
+      "pred_error": "OperationalError: no such table: student",
+      "iterations": 3,
+      "latency_seconds": 2.132701292999627,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT m.first_name, m.last_name\nFROM member m\nJOIN major maj ON m.link_to_major = maj.major_id\nWHERE maj.department = 'Art and Design';",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT s.first_name, s.last_name\nFROM student s\nJOIN student_club sc ON s.student_id = sc.student_id\nJOIN major m ON s.major_id = m.major_id\nWHERE m.department = 'Art and Design';",
+          "ok": false,
+          "error": "OperationalError: no such table: student",
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT s.first_name, s.last_name\nFROM student s\nJOIN student_club sc ON s.student_id = sc.student_id\nJOIN major m ON s.major_id = m.major_id\nWHERE m.department = 'Art and Design';",
+          "ok": false,
+          "error": "OperationalError: no such table: student",
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT m.first_name, m.last_name\nFROM member m\nJOIN major maj ON m.link_to_major = maj.major_id\nWHERE maj.department = 'Art and Design';"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query does not reference the Student_Club table, so it cannot determine which students are in the Student_Club. The question specifically asks for students in the Student_Club from the Art and Design Department, but the SQL only checks majors and ignores club membership."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT s.first_name, s.last_name\nFROM student s\nJOIN student_club sc ON s.student_id = sc.student_id\nJOIN major m ON s.major_id = m.major_id\nWHERE m.department = 'Art and Design';",
+          "issue": "The query does not reference the Student_Club table, so it cannot determine which students are in the Student_Club. The question specifically asks for students in the Student_Club from the Art and Design Department, but the SQL only checks majors and ignores club membership."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The SQL query references tables that do not exist in the database, as indicated by the error 'no such table: student'. This makes the query non-executable and invalid, despite being syntactically correct."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT s.first_name, s.last_name\nFROM student s\nJOIN student_club sc ON s.student_id = sc.student_id\nJOIN major m ON s.major_id = m.major_id\nWHERE m.department = 'Art and Design';",
+          "issue": "The SQL query references tables that do not exist in the database, as indicated by the error 'no such table: student'. This makes the query non-executable and invalid, despite being syntactically correct."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The SQL query references tables that do not exist in the database, as indicated by the error 'no such table: student'. This makes the query non-executable and invalid, despite being syntactically correct."
+        }
+      ]
+    },
+    {
+      "question": "List all the mythic rarity print cards banned in gladiator format.",
+      "db_id": "card_games",
+      "gold_sql": "SELECT DISTINCT T1.id FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T2.format = 'gladiator' AND T2.status = 'Banned' AND T1.rarity = 'mythic'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT c.name\nFROM cards c\nJOIN legalities l ON c.uuid = l.uuid\nWHERE c.rarity = 'mythic'\n  AND l.format = 'gladiator'\n  AND l.status = 'banned'\nLIMIT 100;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.5075604270004987,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT c.name\nFROM cards c\nJOIN legalities l ON c.uuid = l.uuid\nWHERE c.rarity = 'mythic'\n  AND l.format = 'gladiator'\n  AND l.status = 'banned'\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT c.name\nFROM cards c\nJOIN legalities l ON c.uuid = l.uuid\nWHERE c.rarity = 'mythic'\n  AND l.format = 'gladiator'\n  AND l.status = 'banned'\nLIMIT 100;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Among posts by Harvey Motulsky and Noah Snyder, which one has higher popularity?",
+      "db_id": "codebase_community",
+      "gold_sql": "SELECT T1.DisplayName FROM users AS T1 INNER JOIN postHistory AS T2 ON T1.Id = T2.UserId INNER JOIN posts AS T3 ON T2.PostId = T3.Id WHERE T1.DisplayName = 'Harvey Motulsky' OR T1.DisplayName = 'Noah Snyder' GROUP BY T1.DisplayName ORDER BY SUM(T3.ViewCount) DESC LIMIT 1",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT p.Id, p.Title, p.Score, p.ViewCount\nFROM posts p\nJOIN users u ON p.OwnerUserId = u.Id\nWHERE u.DisplayName IN ('Harvey Motulsky', 'Noah Snyder')\nORDER BY p.ViewCount DESC, p.Score DESC\nLIMIT 1;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 1,
+      "latency_seconds": 0.6194786659998499,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT p.Id, p.Title, p.Score, p.ViewCount\nFROM posts p\nJOIN users u ON p.OwnerUserId = u.Id\nWHERE u.DisplayName IN ('Harvey Motulsky', 'Noah Snyder')\nORDER BY p.ViewCount DESC, p.Score DESC\nLIMIT 1;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT p.Id, p.Title, p.Score, p.ViewCount\nFROM posts p\nJOIN users u ON p.OwnerUserId = u.Id\nWHERE u.DisplayName IN ('Harvey Motulsky', 'Noah Snyder')\nORDER BY p.ViewCount DESC, p.Score DESC\nLIMIT 1;"
+        },
+        {
+          "node": "verify",
+          "ok": true,
+          "issue": ""
+        }
+      ]
+    },
+    {
+      "question": "Mention the reputation of users who had obtained the badge on 7/19/2010 7:39:08 PM.",
+      "db_id": "codebase_community",
+      "gold_sql": "SELECT T1.Reputation FROM users AS T1 INNER JOIN badges AS T2 ON T1.Id = T2.UserId WHERE T2.Date = '2010-07-19 19:39:08.0'",
+      "gold_ok": true,
+      "gold_error": null,
+      "final_sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;",
+      "agent_ok": true,
+      "agent_error": null,
+      "pred_ok": true,
+      "pred_error": null,
+      "iterations": 3,
+      "latency_seconds": 3.269281441000203,
+      "correct": false,
+      "per_iteration": [
+        {
+          "iteration": 1,
+          "node": "generate_sql",
+          "sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 2,
+          "node": "revise",
+          "sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        },
+        {
+          "iteration": 3,
+          "node": "revise",
+          "sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;",
+          "ok": true,
+          "error": null,
+          "correct": false
+        }
+      ],
+      "history": [
+        {
+          "node": "generate_sql",
+          "sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;"
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, but the question asks for the reputation of users who obtained a badge on a specific date. The absence of results suggests either no such badges exist, or the date format or precision might not match the data. However, the SQL is syntactically valid and uses correct tables/columns. The main issue is that the result is inconsistent with the expectation of finding at least some users with badges on that date, implying potential data mismatch or incorrect date formatting."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;",
+          "issue": "The query returned 0 rows, but the question asks for the reputation of users who obtained a badge on a specific date. The absence of results suggests either no such badges exist, or the date format or precision might not match the data. However, the SQL is syntactically valid and uses correct tables/columns. The main issue is that the result is inconsistent with the expectation of finding at least some users with badges on that date, implying potential data mismatch or incorrect date formatting."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, but the question asks for the reputation of users who obtained a badge on a specific date. The absence of results suggests either no such badges exist, or the date format or precision might not match the data. However, the SQL is syntactically valid and uses the correct tables and columns. The main issue is that the result is inconsistent with the expectation of finding at least some users with badges on that date, implying potential data mismatch or incorrect date formatting."
+        },
+        {
+          "node": "revise",
+          "sql": "SELECT u.Reputation\nFROM users u\nJOIN badges b ON u.Id = b.UserId\nWHERE b.Date = '2010-07-19 19:39:08'\nLIMIT 100;",
+          "issue": "The query returned 0 rows, but the question asks for the reputation of users who obtained a badge on a specific date. The absence of results suggests either no such badges exist, or the date format or precision might not match the data. However, the SQL is syntactically valid and uses the correct tables and columns. The main issue is that the result is inconsistent with the expectation of finding at least some users with badges on that date, implying potential data mismatch or incorrect date formatting."
+        },
+        {
+          "node": "verify",
+          "ok": false,
+          "issue": "The query returned 0 rows, but the question asks for the reputation of users who obtained a badge on a specific date. The absence of results suggests either no such badges exist, or the date format or precision might not match the data. However, the SQL is syntactically valid and uses the correct tables and columns. The main issue is that the result is inconsistent with the expectation of finding at least some users with badges on that date, implying potential data mismatch or incorrect date formatting."
+        }
+      ]
+    }
+  ]
+}
