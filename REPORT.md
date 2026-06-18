@@ -83,6 +83,10 @@ The following checks were performed:
 3. Manual text-to-SQL prompts generated valid SQL.
 4. The LangGraph agent successfully connected to the endpoint.
 
+### Screenshot
+
+![vLLM manual query](screenshots/vllm_manual_query.png)
+
 ## Challenges
 
 The local laptop was insufficient for running the full model, therefore final testing was performed on the H100 VM. Several iterations were required before obtaining stable serving and correct endpoint configuration.
@@ -141,6 +145,9 @@ Initially dashboards appeared empty because no traffic was reaching the model. A
 
 Grafana successfully visualized serving behavior and provided visibility into latency, throughput, and cache utilization.
 
+### Dashboard
+
+![Grafana dashboard](screenshots/grafana_serving.png)
 ---
 
 # Phase 3: LangGraph Agent
@@ -255,6 +262,13 @@ This proved extremely useful for debugging prompt-related failures.
 
 Tracing successfully captured full LangGraph execution chains.
 
+### Trace example
+
+![Langfuse trace](screenshots/langfuse_trace.png)
+
+### Trace list
+
+![Langfuse tags](screenshots/langfuse_tags.png)
 ---
 
 # Phase 5: Evaluation
@@ -309,6 +323,9 @@ Average iterations decreased from 2.97 to 1.67.
 
 The agent became both more accurate and more efficient.
 
+### Evaluation run
+
+![Grafana during evaluation](screenshots/grafana_eval_run.png)
 ---
 
 # Phase 6: Performance Analysis
@@ -358,6 +375,13 @@ The final system satisfied the latency requirement.
 I did not perform a full sustained 10+ RPS load test over a five-minute window, therefore I cannot claim that requirement was fully validated.
 
 ---
+### Before optimization
+
+![Before tuning](screenshots/Grafana_before.png)
+
+### After optimization
+
+![After tuning](screenshots/grafana_after.png)
 
 # Lessons Learned
 
